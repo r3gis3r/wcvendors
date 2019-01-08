@@ -1,8 +1,9 @@
 <?php
 /**
- * Vendor new order email (plain text)
+ * Vendor cancelled order email (plain text)
  *
- * This template can be overridden by copying it to yourtheme/woocommerce/emails/plain/vendor-notify-order.php.
+ * This template can be overridden by copying it to yourtheme/woocommerce/emails/plain/vendor-notify-cancelled-order.php.
+ *
  *
  * @author         Jamie Madden, WC Vendors
  * @package        WCvendors/Templates/Emails/Plain
@@ -13,13 +14,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-echo '= ' . $email_heading . " =\n\n";
+echo "= " . $email_heading . " =\n\n";
 
-echo sprintf( __( 'You have received an order from %s.', 'wc-vendors' ), $customer_name ) . "\n\n";
+echo __( 'Your order has been cancelled.', 'wc-vendors' ) . "\n\n"; // WPCS: XSS ok.
 
 echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 
-// Change the order details to reflect the vendor order details
+// Change the order details to reflect the vendor order details.
 do_action( 'wcvendors_email_order_details', $order, $sent_to_admin, $plain_text, $email );
 
 echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";

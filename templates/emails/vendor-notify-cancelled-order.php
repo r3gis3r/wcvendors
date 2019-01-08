@@ -1,8 +1,9 @@
 <?php
 /**
- * Vendor new order email
+ * Vendor new cancelled order email
  *
- * This template can be overridden by copying it to yourtheme/woocommerce/emails/vendor-notify-order.php.
+ * This template can be overridden by copying it to yourtheme/woocommerce/emails/vendor-notify-cancelled-order.php.
+ *
  *
  * @author  Jamie Madden, WC Vendors
  * @package WCVendors/Templates/Emails
@@ -18,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
 
-	<p><?php _e( 'You have received an order. The order is as follows:', 'wc-vendors' ); ?></p>
+	<p><?php _e( 'Your order has been cancelled. The order is as follows:', 'wc-vendors' ); // WPCS: XSS ok. ?></p>
 
 <?php
 

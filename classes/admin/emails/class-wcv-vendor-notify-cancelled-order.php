@@ -4,31 +4,31 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( ! class_exists( 'WCVendors_Vendor_Notify_Order' ) ) :
+if ( ! class_exists( 'WCVendors_Vendor_Notify_Cancelled_Order' ) ) :
 
 	/**
-	 * Notify Admin Shipped
+	 * Cancelled Order Email.
 	 *
-	 * An email sent to the admin when the vendor marks the order shipped.
+	 * An email sent to the vendor when an order is marked as cancelled.
 	 *
-	 * @class       WCVendors_Vendor_Notify_Order
+	 * @class       WCVendors_Vendor_Notify_Cancelled_Order
 	 * @version     2.0.0
 	 * @package     Classes/Admin/Emails
 	 * @author      WC Vendors
 	 * @extends     WC_Email
 	 */
-	class WCVendors_Vendor_Notify_Order extends WC_Email {
+	class WCVendors_Vendor_Notify_Cancelled_Order extends WC_Email {
 
 		/**
 		 * Constructor.
 		 */
 		public function __construct() {
 
-			$this->id             = 'vendor_notify_order';
-			$this->title          = sprintf( __( '%s notify order', 'wc-vendors' ), wcv_get_vendor_name() );
-			$this->description    = sprintf( __( 'Notification is sent to %s when an order is paid.', 'wc-vendors' ), wcv_get_vendor_name( true, false ) );
-			$this->template_html  = 'emails/vendor-notify-order.php';
-			$this->template_plain = 'emails/plain/vendor-notify-order.php';
+			$this->id             = 'vendor_notify_cancelled_order';
+			$this->title          = sprintf( __( '%s notify cancelled order', 'wc-vendors' ), wcv_get_vendor_name() );
+			$this->description    = sprintf( __( 'Notification is sent to %s when an order is cancelled.', 'wc-vendors' ), wcv_get_vendor_name( true, false ) );
+			$this->template_html  = 'emails/vendor-notify-cancelled-order.php';
+			$this->template_plain = 'emails/plain/vendor-notify-cancelled-order.php';
 			$this->template_base  = dirname( dirname( dirname( dirname( __FILE__ ) ) ) ) . '/templates/';
 			$this->placeholders   = array(
 				'{site_title}'   => $this->get_blogname(),
@@ -36,15 +36,11 @@ if ( ! class_exists( 'WCVendors_Vendor_Notify_Order' ) ) :
 				'{order_number}' => '',
 			);
 
-			// Triggers
-			add_action( 'woocommerce_order_status_pending_to_processing_notification', array( $this, 'trigger' ), 10, 2 );
-			add_action( 'woocommerce_order_status_pending_to_completed_notification' , array( $this, 'trigger' ), 10, 2 );
-			add_action( 'woocommerce_order_status_failed_to_processing_notification' , array( $this, 'trigger' ), 10, 2 );
-			add_action( 'woocommerce_order_status_failed_to_completed_notification'  , array( $this, 'trigger' ), 10, 2 );
-			add_action( 'woocommerce_order_status_on-hold_to_processing_notification', array( $this, 'trigger' ), 10, 2 );
-			add_action( 'woocommerce_order_status_on-hold_to_completed_notification' , array( $this, 'trigger' ), 10, 2 );
+			// Triggers for this email.
+			add_action( 'woocommerce_order_status_processing_to_cancelled_notification', array( $this, 'trigger' ), 10, 2 );
+			add_action( 'woocommerce_order_status_on-hold_to_cancelled_notification', array( $this, 'trigger' ), 10, 2 );
 
-			// Call parent constructor
+			// Call parent constructor.
 			parent::__construct();
 		}
 
@@ -56,7 +52,7 @@ if ( ! class_exists( 'WCVendors_Vendor_Notify_Order' ) ) :
 		 */
 		public function get_default_subject() {
 
-			return __( '[{site_title}] New Customer Order ({order_number}) - {order_date}', 'wc-vendors' );
+			return __( '[{site_title}] Order Cancelled ({order_number}) - {order_date}', 'wc-vendors' );
 		}
 
 		/**
@@ -67,7 +63,7 @@ if ( ! class_exists( 'WCVendors_Vendor_Notify_Order' ) ) :
 		 */
 		public function get_default_heading() {
 
-			return __( 'New Customer Order', 'wc-vendors' );
+			return __( 'Order Cancelled', 'wc-vendors' );
 		}
 
 		/**
@@ -103,25 +99,10 @@ if ( ! class_exists( 'WCVendors_Vendor_Notify_Order' ) ) :
 
 					// Remove the customer name from the addresses
 					add_filter( 'woocommerce_order_formatted_billing_address', array( $this, 'filter_customer_name' ) );
-					add_filter(
-						'woocommerce_order_formatted_shipping_address', array(
-							$this,
-							'filter_customer_name',
-						)
-					);
+					add_filter( 'woocommerce_order_formatted_shipping_address', array( $this, 'filter_customer_name' ) );
 					$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
-					remove_filter(
-						'woocommerce_order_formatted_billing_address', array(
-							$this,
-							'filter_customer_name',
-						)
-					);
-					remove_filter(
-						'woocommerce_order_formatted_shipping_address', array(
-							$this,
-							'filter_customer_name',
-						)
-					);
+					remove_filter( 'woocommerce_order_formatted_billing_address', array( $this, 'filter_customer_name' ) );
+					remove_filter( 'woocommerce_order_formatted_shipping_address', array( $this, 'filter_customer_name' ) );
 				}
 			}
 
@@ -137,9 +118,7 @@ if ( ! class_exists( 'WCVendors_Vendor_Notify_Order' ) ) :
 		 */
 		public function get_content_html() {
 
-			return apply_filters(
-				'wcv_vendor_notify_order_get_content_html', wc_get_template_html(
-				$this->template_html, array(
+			return apply_filters( 'wcv_vendor_notify_order_get_content_html', wc_get_template_html( $this->template_html, array(
 				'order'          => $this->object,
 				'vendor_id'      => $this->vendor_id,
 				'vendor_items'   => $this->order_items,
@@ -149,9 +128,7 @@ if ( ! class_exists( 'WCVendors_Vendor_Notify_Order' ) ) :
 				'sent_to_vendor' => true,
 				'plain_text'     => false,
 				'email'          => $this,
-			), 'woocommerce', $this->template_base
-			), $this
-			);
+			), 'woocommerce', $this->template_base ), $this );
 		}
 
 		/**
@@ -163,9 +140,7 @@ if ( ! class_exists( 'WCVendors_Vendor_Notify_Order' ) ) :
 		 */
 		public function get_content_plain() {
 
-			return apply_filters(
-				'wcv_vendor_notify_order_get_content_plain', wc_get_template_html(
-				$this->template_plain, array(
+			return apply_filters( 'wcv_vendor_notify_order_get_content_plain', wc_get_template_html( $this->template_plain, array(
 				'order'          => $this->object,
 				'vendor_id'      => $this->vendor_id,
 				'vendor_items'   => $this->order_items,
@@ -175,9 +150,7 @@ if ( ! class_exists( 'WCVendors_Vendor_Notify_Order' ) ) :
 				'totals_display' => $this->totals_display,
 				'plain_text'     => true,
 				'email'          => $this,
-			), 'woocommerce', $this->template_base
-			), $this
-			);
+			), 'woocommerce', $this->template_base ), $this );
 		}
 
 		/**
@@ -223,12 +196,6 @@ if ( ! class_exists( 'WCVendors_Vendor_Notify_Order' ) ) :
 						'none'       => __( 'None', 'wc-vendors' ),
 					),
 					'desc_tip'    => true,
-				),
-				'payment_method' => array(
-					'title'   => __( 'Payment method', 'wc-vendors' ),
-					'type'    => 'checkbox',
-					'label'   => __( 'Include the payment method in the email', 'wc-vendors' ),
-					'default' => 'no',
 				),
 				'email_type'     => array(
 					'title'       => __( 'Email type', 'wc-vendors' ),
